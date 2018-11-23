@@ -6,51 +6,63 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
-
     return new MaterialApp(
       title: 'Startup Name',
       home: new RandomWords(),
     );
-
-//    return new MaterialApp(
-//      title: 'Welcome to Flutter',
-//      home: new Scaffold(
-//        appBar: new AppBar(
-//          title: new Text('Welcome to Flutter~'),
-//        ),
-//        body: new Center(
-//          child: new RandomWords(),
-//        ),
-//      ),
-//    );
   }
 }
 
 class RandomWords extends StatefulWidget {
-
   @override
   createState() => new RandomWordsState();
 }
 
 class RandomWordsState extends State<RandomWords> {
-
   final _suggestions = <WordPair>[];
 
   final _biggerFont = const TextStyle(fontSize: 18.0);
 
+  final _saved = new Set<WordPair>();
+
   @override
   Widget build(BuildContext context) {
-//    final wordPair = new WordPair.random();
-//    return new Text(wordPair.asPascalCase);
+    return new Scaffold(
+      appBar: new AppBar(
+        title: new Text("Startup Name"),
+        actions: <Widget>[
+          new IconButton(icon: new Icon(Icons.list), onPressed: _pushSaved)
+        ],
+      ),
+      body: _buildSuggestions(),
+    );
+  }
+
+  void _pushSaved() {
+    Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
+      final titles = _saved.map((pair) {
+        return new ListTile(
+          title: new Text(
+            pair.asPascalCase,
+            style: _biggerFont,
+          ),
+        );
+      });
+
+      final divided = ListTile.divideTiles(
+        tiles: titles,
+        context: context,
+      ).toList();
+
       return new Scaffold(
         appBar: new AppBar(
-          title: new Text("Startup Name"),
+          title: new Text("Save Suggestions"),
         ),
-        body: _buildSuggestions(),
+        body: new ListView(children: divided),
       );
+    }));
   }
 
   Widget _buildSuggestions() {
@@ -64,86 +76,36 @@ class RandomWordsState extends State<RandomWords> {
           final index = i ~/ 2;
 
           if (index >= _suggestions.length) {
-               _suggestions.addAll(generateWordPairs().take(10));
+            _suggestions.addAll(generateWordPairs().take(10));
           }
 
           return _buildRow(_suggestions[index]);
-        }
+        });
+  }
+
+  Widget _buildRow(WordPair pair) {
+    final alreadySaved = _saved.contains(pair);
+
+    return new ListTile(
+      title: new Text(
+        pair.asPascalCase,
+        style: _biggerFont,
+      ),
+      //加入心型图标
+      trailing: new Icon(
+        alreadySaved ? Icons.favorite : Icons.favorite_border,
+        color: alreadySaved ? Colors.red : null,
+      ),
+      onTap: () {
+        //在Flutter的响应式架构中,调用setState()会触发对 State 对象的 build() 方法的调用，从而导致UI的更新。
+        setState(() {
+          if (alreadySaved) {
+            _saved.remove(pair);
+          } else {
+            _saved.add(pair);
+          }
+        });
+      },
     );
   }
-
-  Widget _buildRow(WordPair pair){
-     return new ListTile(
-        title: new Text(
-          pair.asPascalCase,
-          style: _biggerFont,
-        ),
-     );
-  }
 }
-
-
-//class MyApp extends StatelessWidget {
-//  @override
-//  Widget build(BuildContext context) {
-//    return MaterialApp(
-//      title: 'Our First Flutter app',
-//      home: Scaffold(
-//        appBar: AppBar(
-//          title: Text("Flutter rolling demo"),
-//        ),
-//        body: Center(
-//          child: RollingButton(),
-//        ),
-//      ),
-//    );
-//  }
-//
-//  void _onPressed() {
-//    debugPrint('_onPressed');
-//  }
-//}
-//
-//class RollingButton extends StatefulWidget{
-//
-//  @override
-//  State createState() {
-//     return _RollingState();
-//  }
-//}
-//
-//class _RollingState extends State<RollingButton>{
-//
-//  final _random = Random();
-//
-//  List<int> _roll(){
-//    final roll1 = _random.nextInt(6)+1;
-//    final roll2 = _random.nextInt(6)+1;
-//    return[roll1,roll2];
-//  }
-//
-//  @override
-//  Widget build(BuildContext context) {
-//    return RaisedButton(
-//      child: Text('Roll'),
-//      onPressed: _onPressed,
-//    );
-//  }
-//
-//  void _onPressed() {
-//    debugPrint('_RollingState._onPressed');
-//
-//    final rollResults = _roll();
-//
-//    showDialog(
-//      // 第一个 context 是参数名，第二个 context 是 State 的成员变量
-//        context: context,
-//        builder: (_) {
-//          return AlertDialog(
-//            content: Text('Roll result:(${rollResults[0]}),(${rollResults[1]})'),
-//          );
-//        }
-//    );
-//  }
-//}
-
