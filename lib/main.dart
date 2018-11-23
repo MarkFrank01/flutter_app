@@ -11,6 +11,9 @@ class MyApp extends StatelessWidget {
     return new MaterialApp(
       title: 'Startup Name',
       home: new RandomWords(),
+      theme: new ThemeData(
+        primaryColor: Colors.white,
+      ),
     );
   }
 }
